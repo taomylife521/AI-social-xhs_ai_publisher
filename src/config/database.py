@@ -6,15 +6,14 @@ from typing import Generator
 
 # 使用统一的模型 Base（避免出现创建表/查询表不一致）
 from src.core.models import Base
+from src.core.services.runtime_paths import get_data_dir
 
 class DatabaseManager:
     """数据库管理器"""
     
     def __init__(self):
-        # 获取用户主目录
-        home_dir = os.path.expanduser('~')
         # 创建应用配置目录
-        app_config_dir = os.path.join(home_dir, '.xhs_system')
+        app_config_dir = str(get_data_dir())
         if not os.path.exists(app_config_dir):
             os.makedirs(app_config_dir)
         

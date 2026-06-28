@@ -1,0 +1,74 @@
+name: Release Nuitka
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Existing release tag to upload assets to, for example v1.0.0"
+        required: false
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: windows-x64
+          - os: macos-13
+            artifact: macos-x64
+          - os: macos-14
+            artifact: macos-arm64
+          - os: ubuntu-22.04
+            artifact: linux-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+          pip install -r requirements-build.txt
+
+      - name: Build standalone
+        run: python scripts/build_nuitka.py --clean --assume-yes --output-dir dist-nuitka
+
+      - name: Archive Windows artifact
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist-release | Out-Null
+          Compress-Archive -Path dist-nuitka/* -DestinationPath dist-release/XHS-AI-Publisher-${{ matrix.artifact }}.zip -Force
+
+      - name: Archive Unix artifact
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p dist-release
+          tar -czf dist-release/XHS-AI-Publisher-${{ matrix.artifact }}.tar.gz -C dist-nuitka .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: XHS-AI-Publisher-${{ matrix.artifact }}
+          path: dist-release/*
+
+      - name: Upload release assets
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist-release/*
+          tag_name: ${{ inputs.release_tag || github.ref_name }}

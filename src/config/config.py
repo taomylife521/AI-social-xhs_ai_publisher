@@ -1,15 +1,15 @@
 import json
 import os
 
+from src.core.services.runtime_paths import get_data_dir
+
 
 class Config:
     """配置管理类"""
 
     def __init__(self):
-        # 获取用户主目录
-        home_dir = os.path.expanduser('~')
         # 创建应用配置目录
-        app_config_dir = os.path.join(home_dir, '.xhs_system')
+        app_config_dir = str(get_data_dir())
         if not os.path.exists(app_config_dir):
             os.makedirs(app_config_dir)
 

@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
+from src.core.services.runtime_paths import get_data_dir
+
 
 class DatabaseManager:
     """数据库管理器类"""
@@ -19,7 +21,7 @@ class DatabaseManager:
         # 获取用户主目录
         self.home_dir = os.path.expanduser('~')
         # 创建应用配置目录
-        self.app_config_dir = os.path.join(self.home_dir, '.xhs_system')
+        self.app_config_dir = str(get_data_dir())
         # 数据库文件路径
         self.db_path = os.path.join(self.app_config_dir, 'xhs_data.db')
         # 备份目录

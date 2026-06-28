@@ -7,6 +7,11 @@ coverage.xml
 reports/
 .DS_Store
 dist/
+dist-release/
+dist-nuitka/
+*.build/
+*.dist/
+*.onefile-build/
 output/
 build/dist/
 build/output/
@@ -23,3 +28,8 @@ CLAUDE.md
 .env.*
 !.env.example
  
+
+# Local runtime/debug artifacts
+/debug_publish_button.png
+/error_screenshot.png
+/docker-data/

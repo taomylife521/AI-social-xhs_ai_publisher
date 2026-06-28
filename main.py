@@ -2,6 +2,10 @@ import logging
 import os
 import signal
 import sys
+from src.core.services.runtime_paths import get_logs_dir, init_runtime_env
+
+init_runtime_env()
+
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QMainWindow,
@@ -26,7 +30,7 @@ from src.core.ui.qt_font import (
 )
 
 # 设置日志文件路径
-log_path = os.path.expanduser('~/Desktop/xhsai_error.log')
+log_path = str(get_logs_dir() / "xhsai_error.log")
 logging.basicConfig(filename=log_path, level=logging.DEBUG, encoding="utf-8")
 
 def load_env_file():
@@ -48,11 +52,12 @@ def load_env_file():
 def init_playwright_env():
     """统一 Playwright 浏览器缓存目录，提升 Windows 稳定性。"""
     try:
-        browsers_path = os.path.join(os.path.expanduser("~"), ".xhs_system", "ms-playwright")
-        os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", browsers_path)
+        init_runtime_env()
+        browsers_path = os.environ.get("PLAYWRIGHT_BROWSERS_PATH", "")
         if sys.platform == "win32":
             os.environ.setdefault("PLAYWRIGHT_DOWNLOAD_HOST", "https://npmmirror.com/mirrors/playwright")
-        os.makedirs(browsers_path, exist_ok=True)
+        if browsers_path:
+            os.makedirs(browsers_path, exist_ok=True)
     except Exception:
         pass
 
